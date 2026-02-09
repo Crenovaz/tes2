@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perpustakaan Digital SMAN 1 Magetan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #1e40af; --secondary: #3b82f6; --accent: #f59e0b; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        .bg-animated { background: radial-gradient(circle at 20% 20%, #1e3a8a 0%, transparent 40%), radial-gradient(circle at 80% 80%, #1e40af 0%, transparent 40%), radial-gradient(circle at 50% 50%, #020617 0%, #000 100%); position: fixed; inset: 0; z-index: -1; }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.15); }
+        .input-field { background: rgba(255, 255, 255, 0.9); border: 2px solid transparent; transition: all 0.3s; color: #1e293b; }
+        .input-field:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-animated"></div>
+
+    <!-- Halaman Utama -->
+    <div id="landingPage" class="w-full max-w-4xl text-center">
+        <h1 class="text-5xl font-extrabold mb-12">SMASA <span class="text-blue-400">Smart Library</span></h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button onclick="openForm('Pinjam')" class="bg-white p-10 rounded-3xl text-slate-900 font-bold text-2xl hover:scale-105 transition-transform">PINJAM BUKU</button>
+            <button onclick="openForm('Kembali')" class="bg-white p-10 rounded-3xl text-slate-900 font-bold text-2xl hover:scale-105 transition-transform">KEMBALIKAN</button>
+        </div>
+    </div>
+
+    <!-- Halaman Form -->
+    <div id="formPage" class="hidden w-full max-w-lg">
+        <div class="glass-card p-8 rounded-[2.5rem]">
+            <div class="flex items-center justify-between mb-8">
+                <button onclick="location.reload()" class="text-white"><i class="fa-solid fa-arrow-left"></i></button>
+                <h2 id="formTitle" class="font-black tracking-widest uppercase">FORMULIR</h2>
+                <div class="w-4"></div>
+            </div>
+
+            <form id="libraryForm" class="space-y-6" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="entryType">
+                
+                <div>
+                    <label class="block text-xs font-bold mb-2 opacity-60 uppercase">Nama sesuai absen</label>
+                    <input type="text" id="studentName" required class="input-field w-full px-6 py-4 rounded-2xl outline-none font-bold" placeholder="Nama Lengkap">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold mb-2 opacity-60 uppercase">Kelas</label>
+                    <input type="text" id="studentClass" required class="input-field w-full px-6 py-4 rounded-2xl outline-none font-bold" placeholder="Contoh: XII-F1">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold mb-2 opacity-60 uppercase">Judul Koleksi</label>
+                    <input type="text" id="bookTitle" required class="input-field w-full px-6 py-4 rounded-2xl outline-none font-bold" placeholder="Judul buku atau kode buku">
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-lg transition-all active:scale-95 uppercase tracking-widest">
+                    Proses Data <i class="fa-solid fa-paper-plane ml-2"></i>
+                </button>
+            </form>
+            
+            <p class="text-center text-[10px] opacity-40 mt-6 uppercase tracking-widest" id="dateDisplay"></p>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loading" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center hidden">
+        <div class="text-center">
+            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="font-bold text-xs tracking-widest uppercase">Mengirim Data...</p>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4tBKTd-jliiVH3aiAazxcoi5-_9M8pZb8TPXKny-Z8UVnuUnRi-eUs8OpjuqFMPu2/exec";
+        
+        document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'}).toUpperCase();
+
+        function openForm(mode) {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('formPage').classList.remove('hidden');
+            document.getElementById('entryType').value = mode;
+            document.getElementById('formTitle').textContent = mode + " BUKU";
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            if (SCRIPT_URL.includes("MASUKKAN_URL")) {
+                alert("Mohon masukkan URL Deployment Apps Script Anda di kode HTML.");
+                return;
+            }
+
+            document.getElementById('loading').classList.remove('hidden');
+
+            const payload = {
+                entryType: document.getElementById('entryType').value,
+                studentName: document.getElementById('studentName').value,
+                studentClass: document.getElementById('studentClass').value,
+                bookTitle: document.getElementById('bookTitle').value
+            };
+
+            try {
+                // Mengirim data sebagai string JSON ke doPost
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Menghindari masalah CORS
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // Tunggu sebentar lalu anggap sukses karena no-cors tidak mengembalikan body
+                setTimeout(() => {
+                    document.getElementById('loading').classList.add('hidden');
+                    alert("Berhasil! Data Anda telah dicatat.");
+                    location.reload();
+                }, 1500);
+
+            } catch (error) {
+                document.getElementById('loading').classList.add('hidden');
+                alert("Gagal mengirim data. Pastikan internet stabil dan URL benar.");
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
